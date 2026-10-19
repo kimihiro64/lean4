@@ -14,6 +14,7 @@ export COMPARATOR_BWRAP="$(command -v bwrap)"
 "$COMPARATOR_BWRAP" --version
 "$COMPARATOR_BWRAP" --ro-bind / / --unshare-all -- /bin/true
 
+./clean.sh
 copy_to_work evaluator project
 ROOT="$PWD"
 cd evaluator

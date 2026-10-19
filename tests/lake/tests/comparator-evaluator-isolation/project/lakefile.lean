@@ -3,7 +3,7 @@ open Lake DSL
 
 /-! Attempt tampering during configuration loading, before solution compilation. -/
 
-initialize do
+def attemptTampering : Unit := run_io do
   for name in ["config.json", "accepted.json", "reference.export"] do
     let path := "../evaluator/" ++ name
     try

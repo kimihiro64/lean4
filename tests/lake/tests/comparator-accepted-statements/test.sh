@@ -155,6 +155,6 @@ cat > "$EVALUATOR/disabled.json" <<EOF
 EOF
 test_status_out 1 'Challenge and solution theorem statement do not match' \
   comparator "${COMPARATOR_ARGS[@]}" --config "$EVALUATOR/disabled.json" \
-  --challenge-from-export work/Task.export --solution-from-export work/Conditional.export
+  --solution-from-export work/Conditional.export
 
 rm -f produced.out
