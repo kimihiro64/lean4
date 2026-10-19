@@ -634,6 +634,8 @@ def readEvaluatorInputs (projectDir configFile acceptedFile : System.FilePath)
   let challenge <-
     try LeanExport.parseStream <| .ofHandle (<- IO.FS.Handle.mk challengePath .read)
     catch e => return .error (<- cannotRun s!"could not parse evaluator challenge export: {e}")
+  if challenge.constMap.isEmpty then
+    return .error (<- cannotRun "could not parse evaluator challenge export: no declarations found")
   return .ok (names, challenge)
 
 /--
