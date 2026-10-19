@@ -1,5 +1,5 @@
 module
-import Reference
+public import Reference
 
 /-! Changing a transitive dependency of the challenge must be rejected. -/
 

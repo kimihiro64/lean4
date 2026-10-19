@@ -1,5 +1,5 @@
 module
-import Reference
+public import Reference
 
 /-! The project's own approval list cannot authorize an extra hypothesis. -/
 

@@ -1,5 +1,5 @@
 module
-import Reference
+public import Reference
 
 /-! An identically named proposition with a different meaning must be rejected. -/
 
