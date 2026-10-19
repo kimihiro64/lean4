@@ -63,6 +63,7 @@ sha256sum --check ../expected.sha256
 compare 0 'conditional on: Evaluator.approved'
 for name in config.json accepted.json reference.export; do
   match_text "protected-write-denied: $name" produced.out
+  match_text "protected-write-denied: symlink $name" produced.out
 done
 match_text 'private-build-write-succeeded' produced.out
 match_text 'protected-write-denied: compilation' produced.out
