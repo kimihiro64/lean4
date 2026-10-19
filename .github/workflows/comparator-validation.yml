@@ -11,6 +11,17 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
+      - name: Install and verify real bubblewrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y bubblewrap
+          # Permit unprivileged namespaces on this disposable test runner.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          test "$(id -u)" -ne 0
+          /usr/bin/bwrap --version
+          /usr/bin/bwrap --ro-bind / / --unshare-all -- /bin/true
       - name: Install matching Lean nightly
         id: toolchain
         shell: bash
@@ -29,12 +40,20 @@ jobs:
       - name: Build Lake from the tested sources
         working-directory: tests/lake
         run: ${{ steps.toolchain.outputs.bin }}/lake build
+      - name: Test evaluator isolation with the real sandbox
+        shell: bash
+        run: |
+          set -euo pipefail
+          export LAKE="$PWD/tests/lake/.lake/build/bin/lake"
+          export COMPARATOR_REQUIRE_SANDBOX_TESTS=1
+          tests/lake/run_test.sh tests/comparator-evaluator-isolation
       - name: Run Comparator and checker regression suites
         shell: bash
         run: |
           set -euo pipefail
           export LAKE="$PWD/tests/lake/.lake/build/bin/lake"
           for test in tests/lake/tests/challenge-* tests/lake/tests/check-* tests/lake/tests/comparator-*; do
+            if [ "$test" = tests/lake/tests/comparator-evaluator-isolation ]; then continue; fi
             echo "::group::$test"
             tests/lake/run_test.sh "${test#tests/lake/}"
             echo "::endgroup::"
