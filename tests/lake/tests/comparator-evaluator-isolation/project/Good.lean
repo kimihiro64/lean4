@@ -1,6 +1,7 @@
 module
 import Reference
 import Lean.Elab.BuiltinEvalCommand
+public meta import Lean.Elab.Command
 
 /-! Unused conflicting definitions must not change a literal approved input. -/
 
