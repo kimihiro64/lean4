@@ -1,0 +1,41 @@
+name: Comparator branch validation
+on:
+  push:
+    branches:
+      - validation/comparator-accepted-statements
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install matching Lean nightly
+        id: toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl_bin="$(command -v curl)"
+          tar_bin="$(command -v tar)"
+          test -f "$curl_bin"
+          test -f "$tar_bin"
+          "$curl_bin" -fL --retry 3 https://github.com/leanprover/lean4-nightly/releases/download/nightly-2026-10-19/lean-4.37.0-nightly-2026-10-19-linux.tar.zst -o "$RUNNER_TEMP/lean.tar.zst"
+          "$tar_bin" --zstd -xf "$RUNNER_TEMP/lean.tar.zst" -C "$RUNNER_TEMP"
+          bin="$RUNNER_TEMP/lean-4.37.0-nightly-2026-10-19-linux/bin"
+          test -x "$bin/lake"
+          echo "bin=$bin" >> "$GITHUB_OUTPUT"
+          echo "$bin" >> "$GITHUB_PATH"
+      - name: Build Lake from the tested sources
+        working-directory: tests/lake
+        run: ${{ steps.toolchain.outputs.bin }}/lake build
+      - name: Run Comparator and checker regression suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          export LAKE="$PWD/tests/lake/.lake/build/bin/lake"
+          for test in tests/lake/tests/challenge-* tests/lake/tests/check-* tests/lake/tests/comparator-*; do
+            echo "::group::$test"
+            tests/lake/run_test.sh "${test#tests/lake/}"
+            echo "::endgroup::"
+          done
